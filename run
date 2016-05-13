@@ -1,0 +1,3 @@
+#!/bin/bash
+
+go run god.go node.go
