@@ -18,6 +18,8 @@ func SpawnNodes() []Node {
 	for i := 0; i < NODES; i += 1 {
 		nodes[i] = NewNode(i)
 	}
+	AllocateNeighbors(nodes)
+	CheckNeighbors(nodes)
 	return nodes
 }
 
@@ -33,5 +35,30 @@ func RunDay(nodes []Node) {
 	for i := 0; i < NODES; i += 1 {
 		nodes[i].SetEnvironment()
 		nodes[i].RunDay()
+	}
+}
+
+// Assigns each node in nodes a number of neighboring nodes
+func AllocateNeighbors(nodes []Node) {
+	for i := 0; i < len(nodes); i += 1 {
+		neighbor := i + 1
+		if IsValidNeighbor(nodes, i, neighbor) {
+			nodes[i].AddNeighbor(&nodes[neighbor])
+			nodes[neighbor].AddNeighbor(&nodes[i])
+		}
+	}
+}
+
+// Returns true if node n is a valid neighbor of node i in nodes
+func IsValidNeighbor(nodes []Node, i int, n int) bool {
+	valid := n != i &&
+		n >= 0 &&
+		n < len(nodes)
+	return valid
+}
+
+func CheckNeighbors(nodes []Node) {
+	for i := 0; i < len(nodes); i += 1 {
+		nodes[i].AnnounceNeighbors()
 	}
 }
