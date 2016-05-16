@@ -45,7 +45,7 @@ func (node *Node) Announce(message string) {
 
 // Adds the given node as a neighbor to this node
 func (node *Node) AddNeighbor(neighbor *Node) {
-	node.Announce(fmt.Sprintf("Adding node %d as neighbor to %d", node.id, neighbor.id))
+	node.Announce(fmt.Sprintf("Adding node %d as my neighbor", neighbor.id))
 	node.neighbors = append(node.neighbors, *neighbor)
 }
 
