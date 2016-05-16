@@ -1,10 +1,16 @@
 package main
 
-import "fmt"
+import (
+	"errors"
+	"fmt"
+	"io"
+	"os"
+)
 
 const (
-	NODES = 5 // number of nodes in network
-	DAYS  = 3 // number of days to simulate
+	NODES        = 5         // number of nodes in network
+	DAYS         = 3         // number of days to simulate
+	LOG_FILENAME = "log.txt" // filename to write log to
 )
 
 // Runs the world itself
@@ -74,9 +80,33 @@ func CheckNeighbors(nodes []Node) {
 // Meant to be run in a separate goroutine
 // i.e. `go RunAnnouncer(channel)
 func RunAnnouncer(announcements chan string) {
+	fmt.Printf("Runlog can be found at '%s'\n", LOG_FILENAME)
+	if _, err := os.Stat(LOG_FILENAME); err == nil {
+		err := os.Remove(LOG_FILENAME)
+		if err != nil {
+			// TODO: Handle this gracefully
+			panic(err)
+		}
+	}
+
+	fd, err := os.Create(LOG_FILENAME)
+	if err != nil {
+		// TODO: Handle this gracefully
+		panic(err)
+	}
+
 	for {
 		announcement := <-announcements
-		fmt.Printf("%s\n", announcement)
+		toWrite := fmt.Sprintf("%s\n", announcement)
+		n, err := io.WriteString(fd, toWrite)
+		if n != len(toWrite) {
+			// TODO: Handle this gracefully
+			panic(errors.New(fmt.Sprintf("Only wrote %d out of %d bytes", n, len(toWrite))))
+		}
+		if err != nil {
+			// TODO: Handle this gracefully
+			panic(err)
+		}
 	}
 
 }
