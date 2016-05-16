@@ -32,6 +32,6 @@ func RunDays(nodes []Node, days int) {
 func RunDay(nodes []Node) {
 	for i := 0; i < NODES; i += 1 {
 		nodes[i].SetEnvironment()
-		nodes[i].PlayDay()
+		nodes[i].RunDay()
 	}
 }
