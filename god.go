@@ -1,5 +1,7 @@
 package main
 
+import "fmt"
+
 const (
 	NODES = 5 // number of nodes in network
 	DAYS  = 3 // number of days to simulate
@@ -7,16 +9,20 @@ const (
 
 // Runs the world itself
 func main() {
+	// Prepare announcer
+	announcements := make(chan string)
+	go RunAnnouncer(announcements)
+
 	// Spawn nodes
-	nodes := SpawnNodes()
+	nodes := SpawnNodes(announcements) // TODO: change []Node to []*Node
 	RunDays(nodes, DAYS)
 }
 
 // Initializes and returns an array of starting nodes
-func SpawnNodes() []Node {
+func SpawnNodes(announcements chan string) []Node {
 	nodes := make([]Node, NODES)
 	for i := 0; i < NODES; i += 1 {
-		nodes[i] = NewNode(i)
+		nodes[i] = NewNode(i, announcements)
 	}
 	AllocateNeighbors(nodes)
 	CheckNeighbors(nodes)
@@ -57,8 +63,20 @@ func IsValidNeighbor(nodes []Node, i int, n int) bool {
 	return valid
 }
 
+// Has each node announce its neighbors
 func CheckNeighbors(nodes []Node) {
 	for i := 0; i < len(nodes); i += 1 {
 		nodes[i].AnnounceNeighbors()
 	}
+}
+
+// Manages announcements
+// Meant to be run in a separate goroutine
+// i.e. `go RunAnnouncer(channel)
+func RunAnnouncer(announcements chan string) {
+	for {
+		announcement := <-announcements
+		fmt.Printf("%s\n", announcement)
+	}
+
 }

@@ -7,17 +7,19 @@ import (
 
 // A Node is a single area within a world
 type Node struct {
-	id        int
-	day       uint
-	neighbors []Node // TODO: change []Node to []*Node in all code
+	id            int         // the id of this node
+	day           uint        // the current day at this node
+	neighbors     []Node      // the neighbors of this node // TODO: change []Node to []*Node in all code
+	announcements chan string // a channel to send announcements to
 }
 
 // Initializes and returns a new node
-func NewNode(id int) Node {
+func NewNode(id int, announcements chan string) Node {
 	node := Node{
 		id: id,
 		// day initialized to 0 by default
 		// neighbors initialized to empty slice by default
+		announcements: announcements,
 	}
 	node.Announce("Spawned")
 	return node
@@ -38,7 +40,7 @@ func (node *Node) RunDay() {
 
 // Prints the given message to the console in a nicely formatted way
 func (node *Node) Announce(message string) {
-	fmt.Printf("[Node %d]:\t%s\n", node.id, message)
+	node.announcements <- fmt.Sprintf("[Node %d]:\t%s", node.id, message)
 }
 
 // Adds the given node as a neighbor to this node
