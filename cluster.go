@@ -8,35 +8,27 @@ import (
 )
 
 const (
-	NODES        = 5         // number of nodes in network
-	DAYS         = 3         // number of days to simulate
 	LOG_FILENAME = "log.txt" // filename to write log to
 )
 
-// Runs the world itself
-func main() {
-	// Initialize cluster
-	cluster := NewCluster(1337, NODES)
-
-	// Run cluster
-	cluster.RunDays(DAYS)
-}
-
+// A Cluster represents a process running on a single machine
 type Cluster struct {
 	id            int         // The ID of this cluster
 	nodes         []Node      // The nodes that make up this cluster // TODO: change []Node to []*Node
 	announcements chan string // a channel to handle announcements
+  logName string // the name of the log file for this Cluster
 }
 
-func NewCluster(id int, n int) Cluster {
+func NewCluster(id int, nNodes int) *Cluster {
 	cluster := Cluster{
 		id: id,
 		// nodes initialized to empty slice by default
 		announcements: make(chan string),
+    logName: fmt.Sprintf("%d_%s", id, LOG_FILENAME),
 	}
 	go cluster.RunAnnouncer()
-	cluster.SpawnNodes(n)
-	return cluster
+	cluster.SpawnNodes(nNodes)
+	return &cluster
 }
 
 // Initializes and returns an array of starting nodes
@@ -93,10 +85,10 @@ func (cluster *Cluster) AnnounceNeighbors() {
 // Meant to be run in a separate goroutine
 // i.e. `go RunAnnouncer(channel)
 func (cluster *Cluster) RunAnnouncer() {
-	fmt.Printf("Runlog can be found at '%s'\n", LOG_FILENAME)
-	if _, err := os.Stat(LOG_FILENAME); err == nil {
+	fmt.Printf("Runlog can be found at '%s'\n", cluster.logName)
+	if _, err := os.Stat(cluster.logName); err == nil {
 		// if log file exists, remove it
-		err := os.Remove(LOG_FILENAME)
+		err := os.Remove(cluster.logName)
 		if err != nil {
 			fmt.Printf("Failed to remove old file.\nNo Announcing will happen this run.\nContinuing the run.\n")
 			log.Print(err)
@@ -104,7 +96,7 @@ func (cluster *Cluster) RunAnnouncer() {
 		}
 	}
 
-	fd, err := os.Create(LOG_FILENAME)
+	fd, err := os.Create(cluster.logName)
 	if err != nil {
 		fmt.Printf("Failed to create new file.\nNo Announcing will happen this run.\nContinuing the run.\n")
 		log.Print(err)

@@ -1,4 +1,4 @@
 *.swp
 **/.idea/
 **/scratch/
-log.txt
+*log.txt
