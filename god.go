@@ -1,9 +1,9 @@
 package main
 
 import (
-	"errors"
 	"fmt"
 	"io"
+	"log"
 	"os"
 )
 
@@ -82,17 +82,20 @@ func CheckNeighbors(nodes []Node) {
 func RunAnnouncer(announcements chan string) {
 	fmt.Printf("Runlog can be found at '%s'\n", LOG_FILENAME)
 	if _, err := os.Stat(LOG_FILENAME); err == nil {
+		// if log file exists, remove it
 		err := os.Remove(LOG_FILENAME)
 		if err != nil {
-			// TODO: Handle this gracefully
-			panic(err)
+			fmt.Printf("Failed to remove old file.\nNo Announcing will happen this run.\nContinuing the run.\n")
+			log.Print(err)
+			return
 		}
 	}
 
 	fd, err := os.Create(LOG_FILENAME)
 	if err != nil {
-		// TODO: Handle this gracefully
-		panic(err)
+		fmt.Printf("Failed to create new file.\nNo Announcing will happen this run.\nContinuing the run.\n")
+		log.Print(err)
+		return
 	}
 
 	for {
@@ -100,12 +103,12 @@ func RunAnnouncer(announcements chan string) {
 		toWrite := fmt.Sprintf("%s\n", announcement)
 		n, err := io.WriteString(fd, toWrite)
 		if n != len(toWrite) {
-			// TODO: Handle this gracefully
-			panic(errors.New(fmt.Sprintf("Only wrote %d out of %d bytes", n, len(toWrite))))
+			fmt.Printf("Only wrote %d out of %d bytes", n, len(toWrite))
 		}
 		if err != nil {
-			// TODO: Handle this gracefully
-			panic(err)
+			fmt.Printf("Error writing bytes to log file.\nStopping Announcing for this run.\nContinuing the run.\n")
+			log.Print(err)
+			return
 		}
 	}
 
