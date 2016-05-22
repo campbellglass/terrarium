@@ -12,14 +12,17 @@ const (
 // God does not scale well
 // God is not distributed
 func main() {
-	clusters := SpawnClusters(CLUSTERS, NODES)
+	announcer := NewAnnouncer(NewId("GlobalAnnouncer"))
+  announcer.Run()
+	clusters := SpawnClusters(CLUSTERS, NODES, announcer)
 	RunDays(clusters, DAYS)
 }
 
-func SpawnClusters(nClusters int, nNodes int) []*Cluster {
+// Spawns the given number of Clusters with the given number of Nodes that announce to the given Announcer
+func SpawnClusters(nClusters int, nNodes int, announcer *Announcer) []*Cluster {
 	var clusters []*Cluster
 	for i := 0; i < nClusters; i += 1 {
-		clusters = append(clusters, NewCluster(i, nNodes)) // TODO: use a Registrar to generate ids/comm channels for clusters
+		clusters = append(clusters, NewCluster(i, nNodes, announcer)) // TODO: use a Registrar to generate ids/comm channels for clusters
 	}
 	return clusters
 }

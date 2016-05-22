@@ -40,7 +40,8 @@ func (node *Node) RunDay() {
 
 // Prints the given message to the console in a nicely formatted way
 func (node *Node) Announce(message string) {
-	node.announcements <- fmt.Sprintf("[Node %d]:\t%s", node.id, message)
+  toAnnounce := fmt.Sprintf("[Node %d]:\t%s", node.id, message)
+	node.announcements <- toAnnounce
 }
 
 // Adds the given node as a neighbor to this node

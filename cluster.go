@@ -18,14 +18,16 @@ type Cluster struct {
 	nodes         []Node      // The nodes that make up this cluster // TODO: change []Node to []*Node
 	announcements chan string // a channel to handle announcements
   logName string // the name of the log file for this Cluster
+  globalAnnouncer *Announcer // the global Announcer to send announcements to
 }
 
-func NewCluster(id int, nNodes int) *Cluster {
+func NewCluster(id int, nNodes int, announcer *Announcer) *Cluster {
 	cluster := Cluster{
 		id: id,
 		// nodes initialized to empty slice by default
 		announcements: make(chan string),
     logName: fmt.Sprintf("%s%d_%s", LOG_FILEPATH, id, LOG_FILENAME),
+    globalAnnouncer: announcer,
 	}
 	go cluster.RunAnnouncer()
 	cluster.SpawnNodes(nNodes)
@@ -106,9 +108,14 @@ func (cluster *Cluster) RunAnnouncer() {
 
 	for {
 		announcement := <-cluster.announcements
-		toWrite := fmt.Sprintf("[cluster %d]\t%s\n", cluster.id, announcement)
-		n, err := io.WriteString(fd, toWrite)
-		if n != len(toWrite) {
+		toWrite := fmt.Sprintf("[cluster %d]\t%s", cluster.id, announcement)
+
+    // global announcer
+    cluster.globalAnnouncer.incoming <- []byte(toWrite)
+
+    // local announcer
+		n, err := io.WriteString(fd, fmt.Sprintf("%s\n", toWrite))
+		if n != len(toWrite) + 1 {
 			fmt.Printf("Only wrote %d out of %d bytes", n, len(toWrite))
 		}
 		if err != nil {
