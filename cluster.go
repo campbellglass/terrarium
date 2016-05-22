@@ -9,6 +9,7 @@ import (
 
 const (
 	LOG_FILENAME = "log.txt" // filename to write log to
+  LOG_FILEPATH = "logs/" // path to directory to write log files to
 )
 
 // A Cluster represents a process running on a single machine
@@ -24,7 +25,7 @@ func NewCluster(id int, nNodes int) *Cluster {
 		id: id,
 		// nodes initialized to empty slice by default
 		announcements: make(chan string),
-    logName: fmt.Sprintf("%d_%s", id, LOG_FILENAME),
+    logName: fmt.Sprintf("%s%d_%s", LOG_FILEPATH, id, LOG_FILENAME),
 	}
 	go cluster.RunAnnouncer()
 	cluster.SpawnNodes(nNodes)
